@@ -1,0 +1,43 @@
+version: '3'
+services:
+    sql:
+        image: mysql:5.7
+        container_name: my-sql
+        environment: 
+            MYSQL_ROOT_PASSWORD: 12345678
+            MYSQL_DATABASE: curso_galeria
+            MYSQL_USER: reinaldo
+            MYSQL_PASSWORD: 12345678
+        volumes: 
+            - "$PWD/data:/var/lib/mysql"
+            - "$PWD/conf/curso_galeria.sql:/docker-entrypoint-initdb.d/curso_galeria.sql"
+        ports: 
+            - 3306:3306
+        networks: 
+            - php_sql
+    web:
+        build: .
+        container_name: php-apache
+        ports: 
+            - 80:80
+        volumes: 
+            - "$PWD/src:/var/www/html"
+        networks: 
+            - php_sql
+        depends_on:
+            - sql
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin:5.0.1
+        container_name: phpmyadmin
+        environment:
+            PMA_HOST: sql
+            PMA_USER: reinaldo
+            PMA_PASSWORD: 12345678
+        ports:
+            - 8080:80
+        networks: 
+            - php_sql
+        depends_on:
+            - sql
+networks: 
+    php_sql:
